@@ -1,0 +1,34 @@
+<mat-card *ngIf="book !== undefined">
+  <div class="header">
+    <span>{{book}}</span>
+    <button mat-icon-button [matTooltip]="cache_text" (click)="cacheOrRemoveBook()"><mat-icon>{{cache_state_icon}}</mat-icon></button>
+    <button mat-icon-button class="back-button" matTooltip="Return to library" routerLink="/"><mat-icon>arrow_back</mat-icon></button>
+  </div>
+  <div class="cover">
+    <img class="card-image" [src]="cover_url" />
+  </div>
+  <div class="timeline">
+    <div class="center" aria-label="Current Chapter">
+      {{current_chapter}}
+    </div>
+    <mat-slider min="0" (input)="scrubbing($event.value, $event)" max="{{audio.duration}}" [value]="current_time" increment="0.1"></mat-slider>
+    <div class="center" (click)="toggleDisplayType()"><div *ngIf="display_time_remaining; then remaining_time else timestamp"></div></div>
+    <ng-template #remaining_time>
+      <div aria-label="Time Remaining">
+        {{audio.duration - current_time | timestamp}} remaining
+      </div>
+    </ng-template>
+    <ng-template #timestamp>
+      <div aria-label="Current Timestamp">
+        {{current_time | timestamp}} / {{audio.duration | timestamp}}
+      </div>
+    </ng-template>
+  </div>
+  <div class="center" aria-label="Basic Controls">
+    <button mat-icon-button class="control-button" (click)="skipPrevious()"><mat-icon>skip_previous</mat-icon></button>
+    <button mat-icon-button class="control-button" (click)="replay30()"><mat-icon>replay_30</mat-icon></button>
+    <button mat-icon-button class="control-button" (click)="togglePlay()"><mat-icon>{{play_pause_icon}}</mat-icon></button>
+    <button mat-icon-button class="control-button" (click)="forward30()"><mat-icon>forward_30</mat-icon></button>
+    <button mat-icon-button class="control-button" (click)="skipNext()"><mat-icon>skip_next</mat-icon></button>
+  </div>
+</mat-card>
