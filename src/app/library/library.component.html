@@ -1,3 +1,3 @@
 <div fxLayout="row wrap">
-    <app-book fxFlex="25%" *ngFor="let book of books$ | async" title="{{book}}" cover="/v1/books/{{book}}/cover"></app-book>
+    <app-book [fxFlex]="flexWidth" *ngFor="let book of books$ | async" title="{{book}}" cover="/v1/books/{{book}}/cover"></app-book>
 </div>

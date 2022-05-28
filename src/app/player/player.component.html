@@ -1,6 +1,6 @@
 <mat-card *ngIf="book !== undefined">
   <div class="header">
-    <span>{{book}}</span>
+    <span>{{title}}</span>
     <button mat-icon-button [matTooltip]="cache_text" (click)="cacheOrRemoveBook()"><mat-icon>{{cache_state_icon}}</mat-icon></button>
     <button mat-icon-button class="back-button" matTooltip="Return to library" routerLink="/"><mat-icon>arrow_back</mat-icon></button>
   </div>
@@ -11,7 +11,7 @@
     <div class="center" aria-label="Current Chapter">
       {{current_chapter}}
     </div>
-    <mat-slider min="0" (input)="scrubbing($event.value, $event)" max="{{audio.duration}}" [value]="current_time" increment="0.1"></mat-slider>
+    <mat-slider min="0" (input)="scrubbing($event.value)" max="{{audio.duration}}" [value]="current_time" increment="0.1"></mat-slider>
     <div class="center" (click)="toggleDisplayType()"><div *ngIf="display_time_remaining; then remaining_time else timestamp"></div></div>
     <ng-template #remaining_time>
       <div aria-label="Time Remaining">

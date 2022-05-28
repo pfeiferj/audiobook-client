@@ -1,6 +1,9 @@
 mat-card {
-  width: Calc(100% - 56px);
-  margin:12px;
+  position: absolute;
+  width: Calc(100% - 44px);
+  height: calc(100% - 44px);
+  margin:6px;
+  margin-bottom: 0px;
   flex-direction:column;
 }
 
@@ -17,7 +20,7 @@ mat-card {
 
 .mat-card .cover {
   display: flex;
-  height: 300px;
+  height: Calc(100% - 250px);
   margin-bottom: 16px;
 }
 

@@ -21,6 +21,7 @@ import { LoginComponent } from './login/login.component';
 import { HttpClientModule } from '@angular/common/http';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { TimestampPipe } from './timestamp.pipe';
+import { LayoutModule } from '@angular/cdk/layout';
 
 @NgModule({
   declarations: [
@@ -42,6 +43,7 @@ import { TimestampPipe } from './timestamp.pipe';
     MaterialModule,
     HttpClientModule,
     FlexLayoutModule,
+    LayoutModule,
     ServiceWorkerModule.register('ngsw-worker.js', {
       enabled: environment.production,
       // Register the ServiceWorker as soon as the application is stable

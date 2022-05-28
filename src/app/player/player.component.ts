@@ -69,7 +69,9 @@ export class PlayerComponent implements OnInit {
       const paramsMap = convertToParamMap(params);
       const book = paramsMap.get(BOOK);
       if(book !== null) {
-        console.log(this.audio);
+        this.book = book;
+        this.title = book;
+
         const cachedBook = await this.cache.getBook(book);
         if(cachedBook) {
           this.cache_state = CacheState.CACHED;
@@ -79,7 +81,6 @@ export class PlayerComponent implements OnInit {
           this.audio.src = `/v1/books/${book}`;
         }
         this.audio.ontimeupdate = (e) => this.timeUpdate();
-        this.book = book;
         const currentPosition = await this.cache.getCurrentPosition(book);
         if(currentPosition) {
           this.audio.currentTime = currentPosition.position;
@@ -93,8 +94,9 @@ export class PlayerComponent implements OnInit {
           if(cover) {
             this.cover_url = this.sanitizer.bypassSecurityTrustUrl(URL.createObjectURL(cover.data));
           }
+        } else {
+          this.cover_url = `/v1/books/${this.book}/cover`;
         }
-
       }
     });
   }
@@ -132,13 +134,29 @@ export class PlayerComponent implements OnInit {
 
   }
 
-  public scrubbing(time: number | null, event:any) {
-    console.log(event);
+  public scrubbing(time: number | null) {
     this.current_time = time ?? 0;
     this.audio.currentTime = time ?? 0;
   }
 
   public togglePlay() {
+    if(navigator.mediaSession) {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: this.title,
+        artist: '',
+        album: '',
+        artwork: [
+          { src: this.cover_url.toString() }
+        ]
+      });
+      // setup os controls so that we can update the timestamp on events
+      navigator.mediaSession.setActionHandler('pause', () => { this.togglePlay() })
+      navigator.mediaSession.setActionHandler('seekto', (event) => { this.scrubbing(event.seekTime ?? 0) })
+      navigator.mediaSession.setActionHandler('seekforward', () => { this.forward30() })
+      navigator.mediaSession.setActionHandler('seekbackward', () => { this.replay30() })
+      navigator.mediaSession.setActionHandler('nexttrack', () => { this.skipNext() })
+      navigator.mediaSession.setActionHandler('previoustrack', () => { this.skipPrevious() })
+    }
     if(this.audio.paused) {
       this.audio.play();
     } else {
