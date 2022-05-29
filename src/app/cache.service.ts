@@ -49,7 +49,7 @@ export class CacheService {
     return positions[positions.length - 1];
   }
 
-  async syncPositions(book: string, position?: Position): Promise<Position[]> {
+  async syncPositions(book: string, position?: Position): Promise<{positions: Position[], currentPosition?: Position}> {
     if(position) {
       await db.positions.put(position);
     }
@@ -58,24 +58,25 @@ export class CacheService {
 
     try {
       //TODO: save bandwidth by not re-sending
-      const response = await fetch('/v1/positions', {
-        method: 'POST',
+      const response = await fetch(`/v1/books/${book}/positions`, {
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(positions),
       })
       const newPositions: Position[] = await response.json()
+      const currentPosition = newPositions.find(p => p.timestamp === position?.timestamp) ?? newPositions[newPositions.length - 1];
       if(Array.isArray(newPositions) && newPositions.length) {
-        await db.positions.where({filename: book}).delete();
+        await db.positions.where({book}).delete();
         const updates = newPositions.map(position => db.positions.put(position));
         await Promise.all(updates);
       }
-      return db.positions.where({book}).toArray();
+      return {positions: (await db.positions.where({book}).toArray()), currentPosition};
 
     } catch(e) {
       console.warn(e);
-      return positions;
+      return {positions, currentPosition: position};
     }
   }
 }

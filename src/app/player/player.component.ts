@@ -29,7 +29,6 @@ export class PlayerComponent implements OnInit {
   @Input() public book_length: string = "0";
   @Input() public get current_chapter(): string {
     if(this.chapters && this.chapters.length > 0) {
-      console.log(this.chapters);
       const currentChapter = this.chapters.find(chapter => Number(chapter.start_time) <= this.current_time && Number(chapter.end_time) >= this.current_time);
       if(currentChapter) {
         if(currentChapter.tags.title) {
@@ -151,7 +150,11 @@ export class PlayerComponent implements OnInit {
         Date.now() - this.last_sync > SYNC_INTERVAL &&
         this.current_position.position != 0
       ) || forceSync) {
-      this.cache.syncPositions(this.book, this.current_position);
+      this.cache.syncPositions(this.book, this.current_position).then((newPositions) => {
+        if(this.current_position) {
+          this.current_position = newPositions.currentPosition;
+        }
+      });
       this.last_sync = Date.now();
     }
 
