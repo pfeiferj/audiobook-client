@@ -1,6 +1,8 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { ActivatedRoute, convertToParamMap } from '@angular/router';
+import { Observable } from 'rxjs';
+import { BookService, Metadata } from '../book/book.service';
 import { CacheService } from '../cache.service';
 import { Position } from '../db';
 const BOOK = 'book';
@@ -20,10 +22,23 @@ enum CacheState {
 export class PlayerComponent implements OnInit {
 
   @Input() public book!: string;
+  @Input() public metadata$!: Observable<Metadata>;
+  @Input() public chapters!: Metadata["chapters"];
   @Input() public title!: string;
   @Input() public cover!: string;
   @Input() public book_length: string = "0";
-  @Input() public current_chapter: string = "No Chapters";
+  @Input() public get current_chapter(): string {
+    if(this.chapters && this.chapters.length > 0) {
+      console.log(this.chapters);
+      const currentChapter = this.chapters.find(chapter => Number(chapter.start_time) <= this.current_time && Number(chapter.end_time) >= this.current_time);
+      if(currentChapter) {
+        if(currentChapter.tags.title) {
+          return currentChapter.tags.title;
+        }
+      }
+    }
+    return "";
+  };
   @Input() public display_time_remaining: boolean = true;
   @Input() public cache_state: CacheState = CacheState.DOWNLOADING;
   @Input() public current_position?: Position;
@@ -62,7 +77,7 @@ export class PlayerComponent implements OnInit {
 
   @Input() public current_time: number = 0;
 
-  constructor(private route: ActivatedRoute, public cache: CacheService, private sanitizer: DomSanitizer) { }
+  constructor(private route: ActivatedRoute, public cache: CacheService, private sanitizer: DomSanitizer, private bookService: BookService) { }
 
   ngOnInit(): void {
     this.route.params.subscribe(async params => {
@@ -71,6 +86,14 @@ export class PlayerComponent implements OnInit {
       if(book !== null) {
         this.book = book;
         this.title = book;
+
+        this.metadata$ = this.bookService.getMetadata(book);
+        this.metadata$.subscribe(metadata => {
+          if(metadata.format.tags.title) {
+            this.title = metadata.format.tags.title;
+          }
+          this.chapters = metadata.chapters;
+        });
 
         const cachedBook = await this.cache.getBook(book);
         if(cachedBook) {
