@@ -1,4 +1,5 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, ViewChild, ElementRef } from '@angular/core';
+import { MatMenu } from '@angular/material/menu';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { ActivatedRoute, convertToParamMap } from '@angular/router';
 import { Observable } from 'rxjs';
@@ -21,15 +22,17 @@ enum CacheState {
 })
 export class PlayerComponent implements OnInit {
 
+  public Number = Number;
   @Input() public book!: string;
   @Input() public metadata$!: Observable<Metadata>;
-  @Input() public chapters!: Metadata["chapters"];
+  @Input() public chapters: Metadata["chapters"] = [];
   @Input() public title!: string;
   @Input() public cover!: string;
   @Input() public book_length: string = "0";
+  @Input() public positions: Position[] = [];
   @Input() public get current_chapter(): string {
     if(this.chapters && this.chapters.length > 0) {
-      const currentChapter = this.chapters.find(chapter => Number(chapter.start_time) <= this.current_time && Number(chapter.end_time) >= this.current_time);
+      const currentChapter = this.chapters.find(chapter => Number(chapter.start_time) <= this.current_time && Number(chapter.end_time) > this.current_time);
       if(currentChapter) {
         if(currentChapter.tags.title) {
           return currentChapter.tags.title;
@@ -76,6 +79,8 @@ export class PlayerComponent implements OnInit {
 
   @Input() public current_time: number = 0;
 
+  @ViewChild('positionsMenu') positionsMenu!: MatMenu;
+
   constructor(private route: ActivatedRoute, public cache: CacheService, private sanitizer: DomSanitizer, private bookService: BookService) { }
 
   ngOnInit(): void {
@@ -105,7 +110,7 @@ export class PlayerComponent implements OnInit {
         this.audio.ontimeupdate = (e) => this.timeUpdate();
         const currentPosition = await this.cache.getCurrentPosition(book);
         if(currentPosition) {
-          this.audio.currentTime = currentPosition.position;
+          this.audio.currentTime = currentPosition.position || 0;
           this.current_time = currentPosition.position;
         }
 
@@ -147,12 +152,14 @@ export class PlayerComponent implements OnInit {
     }
 
     if((
-        Date.now() - this.last_sync > SYNC_INTERVAL &&
-        this.current_position.position != 0
+        Date.now() - this.last_sync > SYNC_INTERVAL
       ) || forceSync) {
       this.cache.syncPositions(this.book, this.current_position).then((newPositions) => {
+        this.positions = newPositions.positions;
         if(this.current_position) {
-          this.current_position = newPositions.currentPosition;
+          if(newPositions.currentPosition) {
+            this.current_position = newPositions.currentPosition;
+          }
         }
       });
       this.last_sync = Date.now();
@@ -202,13 +209,29 @@ export class PlayerComponent implements OnInit {
   }
 
   public skipNext() {
-    this.audio.currentTime = this.audio.duration;
-    this.current_time = this.audio.currentTime;
+    if(this.chapters.length) {
+      const nextChapter = this.chapters.find(chapter => Number(chapter.start_time) > this.current_time);
+      if(nextChapter) {
+        this.audio.currentTime = Number(nextChapter.start_time);
+        this.current_time = this.audio.currentTime;
+      }
+    } else {
+      this.audio.currentTime = this.audio.duration;
+      this.current_time = this.audio.currentTime;
+    }
   }
 
   public skipPrevious() {
-    this.audio.currentTime = 0;
-    this.current_time = this.audio.currentTime;
+    if(this.chapters.length) {
+      const previousChapter = this.chapters.find(chapter => Number(chapter.end_time) > this.current_time - 5);
+      if(previousChapter) {
+        this.audio.currentTime = Number(previousChapter.start_time);
+        this.current_time = this.audio.currentTime;
+      }
+    } else {
+      this.audio.currentTime = 0;
+      this.current_time = this.audio.currentTime;
+    }
   }
 
   public toggleDisplayType() {

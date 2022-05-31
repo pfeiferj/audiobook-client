@@ -31,4 +31,44 @@
     <button mat-icon-button class="control-button" (click)="forward30()"><mat-icon>forward_30</mat-icon></button>
     <button mat-icon-button class="control-button" (click)="skipNext()"><mat-icon>skip_next</mat-icon></button>
   </div>
+  <div class="center" aria-label="Advanced Controls">
+    <button mat-icon-button class="control-button" [matMenuTriggerFor]="positionsMenu">
+      <mat-icon>view_timeline</mat-icon>
+    </button>
+    <mat-menu #positionsMenu="matMenu">
+      <ng-template matMenuContent>
+        <ng-container *ngFor="let position of positions.slice().reverse()">
+          <button mat-menu-item (click)="scrubbing(position.position)">
+            {{position.position | timestamp}}
+          </button>
+        </ng-container>
+      </ng-template>
+    </mat-menu>
+
+    <button mat-icon-button class="control-button" [matMenuTriggerFor]="chaptersMenu">
+      <mat-icon>menu_book</mat-icon>
+    </button>
+    <mat-menu #chaptersMenu="matMenu">
+      <ng-template matMenuContent>
+        <ng-container *ngFor="let chapter of chapters">
+          <button mat-menu-item (click)="scrubbing(Number(chapter.start_time))">
+            {{chapter.tags.title ?? chapter.id + 1}} - {{Number(chapter.start_time) | timestamp}}
+          </button>
+        </ng-container>
+      </ng-template>
+    </mat-menu>
+
+    <button mat-icon-button class="control-button"><mat-icon>info</mat-icon></button>
+
+    <button mat-icon-button class="control-button"><mat-icon>more_vert</mat-icon></button>
+    <mat-menu #more="matMenu">
+      <ng-template matMenuContent>
+        <ng-container *ngFor="let position of positions.slice().reverse()">
+          <button mat-menu-item>
+            {{position.position | timestamp}}
+          </button>
+        </ng-container>
+      </ng-template>
+    </mat-menu>
+  </div>
 </mat-card>
