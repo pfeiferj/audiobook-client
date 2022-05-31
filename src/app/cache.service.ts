@@ -56,27 +56,29 @@ export class CacheService {
 
     const positions = await db.positions.where({book}).toArray();
 
-    try {
-      //TODO: save bandwidth by not re-sending
-      const response = await fetch(`/v1/books/${book}/positions`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(positions),
-      })
-      const newPositions: Position[] = await response.json()
-      const currentPosition = newPositions.find(p => p.timestamp === position?.timestamp) ?? newPositions[newPositions.length - 1];
-      if(Array.isArray(newPositions) && newPositions.length) {
-        await db.positions.where({book}).delete();
-        const updates = newPositions.map(position => db.positions.put(position));
-        await Promise.all(updates);
-      }
-      return {positions: (await db.positions.where({book}).toArray()), currentPosition};
+    return {positions, currentPosition: position};
 
-    } catch(e) {
-      console.warn(e);
-      return {positions, currentPosition: position};
-    }
+    //try {
+    //  //TODO: save bandwidth by not re-sending
+    //  const response = await fetch(`/v1/books/${book}/positions`, {
+    //    method: 'PATCH',
+    //    headers: {
+    //      'Content-Type': 'application/json',
+    //    },
+    //    body: JSON.stringify(positions),
+    //  })
+    //  const newPositions: Position[] = await response.json()
+    //  const currentPosition = newPositions.find(p => p.timestamp === position?.timestamp) ?? newPositions[newPositions.length - 1];
+    //  if(Array.isArray(newPositions) && newPositions.length) {
+    //    await db.positions.where({book}).delete();
+    //    const updates = newPositions.map(position => db.positions.put(position));
+    //    await Promise.all(updates);
+    //  }
+    //  return {positions: (await db.positions.where({book}).toArray()), currentPosition};
+
+    //} catch(e) {
+    //  console.warn(e);
+    //  return {positions, currentPosition: position};
+    //}
   }
 }
