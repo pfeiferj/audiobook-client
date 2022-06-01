@@ -9,66 +9,27 @@
   </div>
   <div class="timeline">
     <div class="center" aria-label="Current Chapter">
-      {{current_chapter}}
+      {{audioService.current_chapter}}
     </div>
-    <mat-slider min="0" (input)="scrubbing($event.value)" max="{{audio.duration}}" [value]="current_time" increment="0.1"></mat-slider>
+    <mat-slider min="0" (input)="audioService.setPosition($event.value ?? 0)" max="{{audioService.audio.duration}}" [value]="current_time" increment="0.1"></mat-slider>
     <div class="center" (click)="toggleDisplayType()"><div *ngIf="display_time_remaining; then remaining_time else timestamp"></div></div>
     <ng-template #remaining_time>
       <div aria-label="Time Remaining">
-        {{audio.duration - current_time | timestamp}} remaining
+        {{audioService.audio.duration - audioService.current_time | timestamp}} remaining
       </div>
     </ng-template>
     <ng-template #timestamp>
       <div aria-label="Current Timestamp">
-        {{current_time | timestamp}} / {{audio.duration | timestamp}}
+        {{current_time | timestamp}} / {{audioService.audio.duration | timestamp}}
       </div>
     </ng-template>
   </div>
   <div class="center" aria-label="Basic Controls">
-    <button mat-icon-button class="control-button" (click)="skipPrevious()"><mat-icon>skip_previous</mat-icon></button>
-    <button mat-icon-button class="control-button" (click)="replay30()"><mat-icon>replay_30</mat-icon></button>
-    <button mat-icon-button class="control-button" (click)="togglePlay()"><mat-icon>{{play_pause_icon}}</mat-icon></button>
-    <button mat-icon-button class="control-button" (click)="forward30()"><mat-icon>forward_30</mat-icon></button>
-    <button mat-icon-button class="control-button" (click)="skipNext()"><mat-icon>skip_next</mat-icon></button>
+    <button mat-icon-button class="control-button" (click)="audioService.skipPrevious()"><mat-icon>skip_previous</mat-icon></button>
+    <button mat-icon-button class="control-button" (click)="audioService.jump(-30)"><mat-icon>replay_30</mat-icon></button>
+    <button mat-icon-button class="control-button" (click)="audioService.togglePlay()"><mat-icon>{{play_pause_icon}}</mat-icon></button>
+    <button mat-icon-button class="control-button" (click)="audioService.jump(30)"><mat-icon>forward_30</mat-icon></button>
+    <button mat-icon-button class="control-button" (click)="audioService.skipNext()"><mat-icon>skip_next</mat-icon></button>
   </div>
-  <div class="center" aria-label="Advanced Controls">
-    <button mat-icon-button class="control-button" [matMenuTriggerFor]="positionsMenu">
-      <mat-icon>view_timeline</mat-icon>
-    </button>
-    <mat-menu #positionsMenu="matMenu">
-      <ng-template matMenuContent>
-        <ng-container *ngFor="let position of positions.slice().reverse()">
-          <button mat-menu-item (click)="scrubbing(position.position)">
-            {{position.position | timestamp}}
-          </button>
-        </ng-container>
-      </ng-template>
-    </mat-menu>
-
-    <button mat-icon-button class="control-button" [matMenuTriggerFor]="chaptersMenu">
-      <mat-icon>menu_book</mat-icon>
-    </button>
-    <mat-menu #chaptersMenu="matMenu">
-      <ng-template matMenuContent>
-        <ng-container *ngFor="let chapter of chapters">
-          <button mat-menu-item (click)="scrubbing(Number(chapter.start_time))">
-            {{chapter.tags.title ?? chapter.id + 1}} - {{Number(chapter.start_time) | timestamp}}
-          </button>
-        </ng-container>
-      </ng-template>
-    </mat-menu>
-
-    <button mat-icon-button class="control-button"><mat-icon>info</mat-icon></button>
-
-    <button mat-icon-button class="control-button"><mat-icon>more_vert</mat-icon></button>
-    <mat-menu #more="matMenu">
-      <ng-template matMenuContent>
-        <ng-container *ngFor="let position of positions.slice().reverse()">
-          <button mat-menu-item>
-            {{position.position | timestamp}}
-          </button>
-        </ng-container>
-      </ng-template>
-    </mat-menu>
-  </div>
+  <app-additional-controls [positionService]="positionService" [audioService]="audioService"></app-additional-controls>
 </mat-card>
