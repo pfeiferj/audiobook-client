@@ -70,7 +70,7 @@ export class PlayerComponent implements OnInit {
       const paramsMap = convertToParamMap(params);
       const book = paramsMap.get(BOOK);
       if(book !== null) {
-        this.positionService.current_position.book = book;
+        this.positionService.setBook(book);
         this.book = book;
         this.title = book;
 
@@ -115,40 +115,6 @@ export class PlayerComponent implements OnInit {
       }
     });
   }
-
-//  private timeUpdate(forceSync: boolean = false) {
-//    const isManualChange = this.current_time == this.audio.currentTime;
-//    this.current_time = this.audio.currentTime;
-//
-//    if(
-//      this.current_position &&
-//      !isManualChange
-//    ) {
-//      this.current_position.position = this.current_time;
-//      this.current_position.timestamp = Date.now();
-//    } else {
-//      this.current_position = {
-//        book: this.book,
-//        position: this.current_time,
-//        timestamp: Date.now()
-//      };
-//    }
-//
-//    if((
-//        Date.now() - this.last_sync > SYNC_INTERVAL
-//      ) || forceSync) {
-//      this.cache.syncPositions(this.book, this.current_position).then((newPositions) => {
-//        this.positions = newPositions.positions;
-//        if(this.current_position) {
-//          if(newPositions.currentPosition) {
-//            this.current_position = newPositions.currentPosition;
-//          }
-//        }
-//      });
-//      this.last_sync = Date.now();
-//    }
-//
-//  }
 
   public toggleDisplayType() {
     this.display_time_remaining = !this.display_time_remaining;

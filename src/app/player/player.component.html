@@ -11,7 +11,7 @@
     <div class="center" aria-label="Current Chapter">
       {{audioService.current_chapter}}
     </div>
-    <mat-slider min="0" (input)="audioService.setPosition($event.value ?? 0)" max="{{audioService.audio.duration}}" [value]="current_time" increment="0.1"></mat-slider>
+    <mat-slider min="0" (input)="audioService.setPosition($event.value ?? 0)" max="{{audioService.audio.duration}}" [value]="audioService.current_time" increment="0.1"></mat-slider>
     <div class="center" (click)="toggleDisplayType()"><div *ngIf="display_time_remaining; then remaining_time else timestamp"></div></div>
     <ng-template #remaining_time>
       <div aria-label="Time Remaining">
@@ -20,7 +20,7 @@
     </ng-template>
     <ng-template #timestamp>
       <div aria-label="Current Timestamp">
-        {{current_time | timestamp}} / {{audioService.audio.duration | timestamp}}
+        {{audioService.current_time | timestamp}} / {{audioService.audio.duration | timestamp}}
       </div>
     </ng-template>
   </div>

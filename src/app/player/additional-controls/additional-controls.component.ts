@@ -1,5 +1,4 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { Metadata } from 'src/app/book/book.service';
 import { AudioService } from '../audio.service';
 import { PositionService } from '../position.service';
 
@@ -16,7 +15,5 @@ export class AdditionalControlsComponent implements OnInit {
 
   constructor() { }
 
-  ngOnInit(): void {
-    console.log(this.positionService);
-  }
+  ngOnInit(): void {}
 }

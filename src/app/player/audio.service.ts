@@ -26,6 +26,7 @@ export class AudioService {
   public metadata?: Metadata;
   public cover?: string;
   private subscriptions: Subscription[] = [];
+  startup_position: number = 0;
 
   constructor() {
     this.audio = new Audio();
@@ -148,6 +149,7 @@ export class AudioService {
     this.current_time = 0;
     this.setMediaSession();
     this.subscriptions = [];
+    this.startup_position = 0;
   }
 
   /**
@@ -155,6 +157,10 @@ export class AudioService {
     */
   public setSrc(src: string) {
     this.audio.src = src;
+    this.audio.onloadedmetadata = () => {
+      console.log('loaded metadata', this.audio.duration, this.startup_position);
+      this.setPosition(this.startup_position)
+    };
   }
 
   /**
@@ -169,6 +175,16 @@ export class AudioService {
     }
     this.audio.currentTime = time;
     this.callSubscriptions(AudioEventType.SET_POSITION);
+  }
+
+  /**
+    * Jump to a position once audio has loaded.
+    */
+  public setStartupPosition(seconds: number) {
+    if(this.audio.duration) {
+      this.setPosition(seconds);
+    }
+    this.startup_position = seconds;
   }
 
   /**

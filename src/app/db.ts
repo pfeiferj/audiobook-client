@@ -11,19 +11,20 @@ export interface Cover {
 }
 
 export interface Position {
+  client_id?: number;
   id?: number;
   book: string;
   position: number;
   timestamp: number;
 }
 
-export const DB_VERSION = 1;
+export const DB_VERSION = 2;
 export const DB_NAME = "audiobook-client";
 
 export const DB_OBJECTS = {
   books: '&filename',
   covers: '&book',
-  positions: '++id,book'
+  positions: '++client_id,book'
 };
 
 
